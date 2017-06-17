@@ -6,7 +6,7 @@ this:
 
 ```SystemVerilog
 # Arguments passed to $test_bin, evaluated at use
-test_bin_args='"${(z@)$(<$file)}"' # Zshell code
+test_bin_args='"${(Q)${(z@)$(<$file)}}"' # Zshell code
 ```
 
 The variable `$file` is set to current test-file for each test-run. Example test file:
@@ -16,10 +16,21 @@ ftps://github.com/zdharma/zconvey.git -r development -p Src/params.c
 ```
 
 So `$(<$file)` will read contents of the test-file, and `Zsh`-flag `(z@)` will split them into
-array, passed to `$test_bin` as arguments. `(z)` flag supports quoting, so you can pass
-arguments like `'$HOME/test directory'`, i.e. with spaces.
+array, `(Q)` flag will then unquote each element, to be then passed to `$test_bin` as arguments.
+The use of `(z)` and `(Q)` flags support quoting, so you can pass arguments like
+`'$HOME/test directory'`, i.e. with spaces.
 
-## Integrating with project
+## Error Definitions
+
+You can define errors so that they are skipped from test result. A definition looks looks this:
+
+```zsh
+errors2+=( "* / zsh_main / setupvals / gettimeofday / *" )
+```
+
+and is placed in `__error1.def` or other such file with index.
+
+## Integrating With Project
 
 `configure.ac` is provided, user needs to take crucial parts from it and add to its own `configure.ac`.
 For example, following needs to be added:
@@ -34,7 +45,7 @@ Generated are 2 make files, `VATSMakefile` in root directory, `Makefile` in `VAT
 Check out the integration done with a project: [cgiturl](https://github.com/zdharma/cgiturl). It is a
 `CMake` project, the `configure` script used is taken directly from `VATS`.
 
-## Fundamental test-configuration
+## Fundamental Test-Configuration
 
 Main configuration-file is `vtest.conf`. It defines two settings:
 
@@ -52,7 +63,7 @@ via `#!/bin/sh` and `exec /usr/bin/env "$zsh_control_bin"`.
 
 The setting `test_bin` specifies test-program used to run tests. **This binary is examined by Valgrind**.
 
-## Remaining test-configuration
+## Remaining Test-Configuration
 
 The setting `tkind` is used to set a **test-kind**. These are modes of Valgrind operation.
 Allowed values are: `error` (only detect read/write errors), `leak` (also detect memory leaks),
