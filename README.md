@@ -6,7 +6,7 @@ this:
 
 ```SystemVerilog
 # Arguments passed to $test_bin, evaluated at use
-test_bin_args='"${(Q)${(z@)$(<$file)}}"' # Zshell code
+test_bin_args='"${(z@)$(<$file)}"'
 ```
 
 The variable `$file` is set to current test-file for each test-run. Example test file:
@@ -16,9 +16,8 @@ ftps://github.com/zdharma/zconvey.git -r development -p Src/params.c
 ```
 
 So `$(<$file)` will read contents of the test-file, and `Zsh`-flag `(z@)` will split them into
-array, `(Q)` flag will then unquote each element, to be then passed to `$test_bin` as arguments.
-The use of `(z)` and `(Q)` flags support quoting, so you can pass arguments like
-`'$HOME/test directory'`, i.e. with spaces.
+array, passed to `$test_bin` as arguments. `(z)` flag supports quoting, so you can pass
+arguments like `'$HOME/test directory'`, i.e. with spaces.
 
 ## Error Definitions
 
