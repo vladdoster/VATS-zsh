@@ -59,6 +59,12 @@ errors1+=(
     # A06
     "main / zsh_main / init_io / *"
 
+    # A04
+    "* / parse_event / zshlex / gettok / ingetc / inputline / shingetline / fgetc / *"
+
+    # A04, OS X related
+    "bootstrap_look_up3 / _xpc_interface_routine / xpc_pipe_routine / *"
+
     #
     # db_gdbm
     #
