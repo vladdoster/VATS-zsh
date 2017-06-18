@@ -60,6 +60,7 @@ filters=(
     "5-Error" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
     "6-Info" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
     "7-Blank" "(#b)(#s)(==[0-9]##==[[:blank:]]#)(#e)"
+    "8-TestDesc" "(#b)VATS test:(*)"
 )
 
 # Helper regexes
@@ -164,6 +165,7 @@ process_block() {
                 reply=()
                 to_clean_stacktrace "${bl[@]}"
                 if test_stack_trace "${reply[@]}"; then
+                    print "$test_desc"
                     show_block "$blank" "$first" "${bl[@]}"
                 else
                     print -r -- "${theme[skip_msg]}Skipped single-block error: $REPLY${theme[rst]}"
@@ -179,6 +181,7 @@ process_block() {
                 to_clean_stacktrace "${second_subblock_funs[@]}"
 
                 if test_stack_trace "${reply[@]}"; then
+                    print "$test_desc"
                     show_block "$blank" "$first" "${first_subblock_funs[@]}" "$second" ${second_subblock_funs[@]}
                 else
                     print -r -- "${theme[skip_msg]}Skipped double-block error: $REPLY${theme[rst]}"
@@ -457,8 +460,8 @@ show_block()
 coproc 2>&1 valgrind "$@"
 
 integer count=0
-local matched prev_matched blank_seen=0
-local -a block umblock
+typeset matched prev_matched blank_seen=0 test_desc
+typeset -a block umblock
 
 while read -p line; do
     matched=""
@@ -476,6 +479,8 @@ while read -p line; do
             elif [[ "$prev_matched" = *Summary && "$key" = *Error ]]; then
                 process_block $block
                 block=( "${key}/$line" )
+            elif [[ "$key" = *TestDesc ]]; then
+                 test_desc="$line"
             else
                 block+=( "${key}/$line" )
             fi
