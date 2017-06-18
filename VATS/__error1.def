@@ -65,6 +65,9 @@ errors1+=(
     # A04, OS X related
     "bootstrap_look_up3 / _xpc_interface_routine / xpc_pipe_routine / *"
 
+    # A04, OS X related
+    "dispatch_once_f / _dispatch_client_callout / * / bootstrap_look_up3 / _xpc_interface_routine / xpc_pipe_routine / *"
+
     #
     # db_gdbm
     #
