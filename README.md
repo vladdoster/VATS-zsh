@@ -30,9 +30,10 @@ arguments like `'$HOME/test directory'`, i.e. with spaces.
 
 ## Error Definitions
 
-You can define errors so that they are skipped from test result. This is the main feature of VATS
-because it allows to very quickly check if changes broke anything. Usage is very much like of unit
-tests – run, look for any red color, done. A typical definition for Zshell can look like this:
+You can define errors so that they are skipped from test result (i.e. from Valgrind output). This is
+the main feature of VATS because it allows to quickly check if changes broke anything. Usage is very
+much like of unit tests – run `make TESTNUM=A01`, look for any red color, done. Zero parsing with
+eyes. A typical definition for Zshell can look like this:
 
 ```zsh
 errors1+=( "* / zsh_main / setupvals / gettimeofday / *" )
