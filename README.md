@@ -1,30 +1,39 @@
 # Valgrind Automatic Tests Suite (VATS)
 
-Runs sequence of tests, preceded by `valgrind` call, with arguments taken from file `vtest.conf`
-(i.e. valgrind-test.conf). The arguments are dynamic because the `vtest.conf` entry can look like
-this:
+Runs sequence of tests, preceded by `valgrind` call, with a command and arguments taken from file `vtest.conf`.
+The arguments are dynamic because the `vtest.conf` entry can look like this:
 
 ```SystemVerilog
-# Arguments passed to $test_bin, evaluated at use
+# Arguments passed to $test_bin, evaluated at use (i.e. for each test separately)
 test_bin_args='"${(z@)$(<$file)}"'
+
+# Earlier in vtest.conf, there is for example a CMake built binary
+test_bin="../build_/cgiturl"
+
+# For Zshell-integrated VATS, the above are:
+test_bin="local-zsh"                                # expands to ../Src/zsh
+test_bin_args='+Z -f $ZTST_srcdir/ztst.zsh $file'   # runs ztst.zsh on given $file
 ```
 
 The variable `$file` is set to current test-file for each test-run. Example test file:
 
 ```SystemVerilog
-ftps://github.com/zdharma/zconvey.git -r development -p Src/params.c
+-r development -p Src/params.c ftps://github.com/zdharma/zconvey
 ```
 
 So `$(<$file)` will read contents of the test-file, and `Zsh`-flag `(z@)` will split them into
 array, passed to `$test_bin` as arguments. `(z)` flag supports quoting, so you can pass
 arguments like `'$HOME/test directory'`, i.e. with spaces.
 
+**Zshell**: For Zsh-integrated VATS, `$file` is just passed as argument to `ztst.zsh`. So it is
+`A01grammar.ztst`, for example.
+
 ## Error Definitions
 
 You can define errors so that they are skipped from test result. A definition looks looks this:
 
 ```zsh
-errors2+=( "* / zsh_main / setupvals / gettimeofday / *" )
+errors1+=( "* / zsh_main / setupvals / gettimeofday / *" )
 ```
 
 and is placed in `__error1.def` or other such file with index.
@@ -39,10 +48,10 @@ AC_CONFIG_FILES(Config/definitions.mk VATSMakefile VATS/Makefile)
 AC_CONFIG_COMMANDS([stamp-h], [echo >stamp-h])
 ```
 
-Generated are 2 make files, `VATSMakefile` in root directory, `Makefile` in `VATS` subdirectory.
+Generated are 2 make files, `VATSMakefile` in root directory, `Makefile` in VATS subdirectory.
 
 Check out the integration done with a project: [cgiturl](https://github.com/zdharma/cgiturl). It is a
-`CMake` project, the `configure` script used is taken directly from `VATS`.
+`CMake` project, the `configure` script used is taken directly from VATS and only configures tests.
 
 ## Fundamental Test-Configuration
 
