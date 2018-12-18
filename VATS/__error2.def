@@ -1,0 +1,30 @@
+# -*- Mode: sh; sh-indentation: 4; indent-tabs-mode: nil; sh-basic-offset: 4; -*-
+# vim:ft=zsh:sw=4:sts=4:et
+
+#
+# OS X related errors
+#
+
+typeset -ga errors2
+errors2+=(
+    # OS X related error (a calloc after fork())
+    "* / execcmd_fork / * / fork / * / calloc"
+    # OS X related error (a calloc after fork())
+    "* / zfork / * / fork / * / calloc"
+    # OS X related error (a calloc after dlopen())
+    "* / bin_zmodload / * / do_load_module / * / dlopen / * / calloc"
+    # OS X related error
+    "* / si_user_byuid / *"
+    # OS X related error
+    "* / dispatch_once_f / *"
+    # OS X related error
+    "* / xpc_pipe_routine / *"
+    # OS X related error
+    "* / libdispatch_init / *"
+    # OS X related error
+    "* / _dyld_objc_notify_register / *"
+    # OS X related error
+    "* / libSystem_initializer / *"
+    # OS X related error
+    "* / bootstrap_look_up2 / *"
+)

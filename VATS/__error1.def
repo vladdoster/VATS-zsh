@@ -34,12 +34,19 @@ errors1+=(
 
     # As above
     "* / execode / execlist / execpline / execpline2 / zfork / fork / *"
+    # calloc-error after getpwuid
+    "* / zsh_main / * / getpwuid / *"
 
     # As above
     "* / eval / execode / execlist / execpline / * / zsh_main / zfork / setlocale / fork / *"
+    # malloc after ttyname
+    "* / zsh_main / * / ttyname / *"
 
     # As above
     "* / execrepeat / execlist / execpline / execpline2 / execcmd_exec / zfork / *"
+    # calloc-error after getpwuid
+    # malloc after setlocale
+    "* / zsh_main / * / setlocale / *"
 
     # As above
     "* / execcmd_exec / prefork / stringsubst / getoutput / zfork / fork / *"
@@ -49,6 +56,7 @@ errors1+=(
 
     # As above
     "* / execsimple / addvars / prefork / stringsubst / getoutput / zfork / fork / *"
+
 
     # As above
     "* / addvars / prefork / stringsubst / getoutput / zfork / fork / *"
