@@ -108,6 +108,8 @@ is_blank() {
 }
 # }}}
 # FUNCTION: which_byat {{{
+# Returns index of the type of ByAt line, inside REPLY parameter
+# ByAt line: (by|at) 0xADDRESS: ...
 which_byat() {
     [[ "$1" = "1-ByAt/"* ]] && { REPLY="1"; return; }
     [[ "$1" = "2-ByAt/"* ]] && { REPLY="2"; return; }
@@ -141,7 +143,7 @@ info_enabled()
 # Input:
 #   $@ - block of text (i.e. set of lines occurred before Valgrind blank line)
 # Output:
-#   stdout - Valgrind block of text printed or suppressed
+#   stdout - Valgrind block of text printed OR suppressed
 #
 process_block() {
     local -a bl first_subblock_funs second_subblock_funs
@@ -251,7 +253,7 @@ test_stack_trace()
 
     stacktrace=( "${(Oa)@}" )
 
-    for (( idx = 0; idx <= 10; idx ++ )); do
+    for (( idx = 0; idx <= 20; idx ++ )); do
         var_name="errors$idx"
         cur_errors=( "${(PA@)var_name}" )
         [[ -z "$cur_errors[1]" ]] && continue
@@ -404,6 +406,7 @@ show_block()
         line="${@[idx]}"
         next_line="${@[idx+1]}"
 
+        # ByAt line: (by|at) 0xADDRESS: ...
         if [[ "$line" = "1-ByAt/"* ]]; then
             if [[ "${line#*/}" = ${~filters[1-ByAt]} ]]; then
                 print "${theme[pid]}${match[1]}${theme[byat]}${match[2]}${theme[func]}${match[3]}${theme[symbol]} (${theme[where_file]}${match[4]/:/${theme[symbol]}:${theme[number]}}${theme[symbol]})${theme[rst]}"
