@@ -44,7 +44,10 @@ typeset -ga reply
 
 trap "coproc exit; return" TERM INT QUIT
 
-source "${ZERO_DIR}/"__error*.def
+typeset -g i
+for i in "${ZERO_DIR}/"__error*.def; do
+    source "$i"
+done
 
 # Some fallbacks (currently unused)
 [[ "$test_bin" = "local-zsh" ]] && test_bin="${VATS_exe}"
