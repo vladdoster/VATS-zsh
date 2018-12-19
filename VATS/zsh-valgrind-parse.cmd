@@ -329,7 +329,7 @@ compare_error()
             fi
 
             # Found, move to next stack element, continue to next error-part
-            mdebug_mode && print "Found \`$part', moving to next (in valgrind stack trace): \`${stacktrace[stack_idx+1]}'"
+            mdebug_mode && print "Looking for \`$part', FOUND (in valgrind stack trace): \`${stacktrace[stack_idx]}', moving to next: \`${stacktrace[stack_idx+1]}'"
             stack_idx+=1
             mode="exact"
             continue
