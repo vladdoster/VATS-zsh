@@ -94,6 +94,12 @@ theme=(
 # Testers
 #
 
+# Enable global mdebug (not local as with `interested_in')
+declare mdebug=0
+# Assign a function name / pattern to see log messages
+# only when a stacktrace and an error definition are
+# containing the function
+declare interested_in=""
 # FUNCTION: mdebug_mode {{{
 mdebug_mode()
 {
@@ -251,10 +257,13 @@ to_clean_stacktrace()
 test_stack_trace()
 {
     local -a stacktrace cur_errors
-    integer idx ssize
+    integer idx ssize found_in_trace=0
     local error var_name
 
     stacktrace=( "${(Oa)@}" )
+
+    # Dynamic mdebug mode, for `interested_in' function
+    [[ -n "$interested_in" && -n "${(M)stacktrace[@]:#${~interested_in}}" ]] && found_in_trace=1
 
     for (( idx = 0; idx <= 20; idx ++ )); do
         var_name="errors$idx"
@@ -262,13 +271,16 @@ test_stack_trace()
         [[ -z "$cur_errors[1]" ]] && continue
         if [[ "${#cur_errors}" -gt 0 ]]; then
             for error in "${cur_errors[@]}"; do
+                [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)"${~interested_in}"([^/]#/*|[^/]#) ]] && mdebug=1
                 mdebug_mode && print "Processing error: $error"
                 if compare_error "$error" "${stacktrace[@]}"; then
+                    [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)"${~interested_in}"([^/]#/*|[^/]#) ]] && mdebug=0
                     # Error matched stack trace, result is false
                     # i.e. skip displaying the block
                     REPLY="$error"
                     return 1;
                 fi
+                [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)"${~interested_in}"([^/]#/*|[^/]#) ]] && mdebug=0
             done
         fi
     done
