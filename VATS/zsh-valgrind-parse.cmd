@@ -278,16 +278,16 @@ test_stack_trace()
         [[ -z "$cur_errors[1]" ]] && continue
         if [[ "${#cur_errors}" -gt 0 ]]; then
             for error in "${cur_errors[@]}"; do
-                [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)"${~interested_in}"([^/]#/*|[^/]#) ]] && mdebug=1
+                [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)${~interested_in}([^/]#/*|[^/]#) ]] && mdebug=1
                 mdebug_mode && print "Processing error: $error"
                 if compare_error "$error" "${stacktrace[@]}"; then
-                    [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)"${~interested_in}"([^/]#/*|[^/]#) ]] && mdebug=0
+                    [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)${~interested_in}([^/]#/*|[^/]#) ]] && mdebug=0
                     # Error matched stack trace, result is false
                     # i.e. skip displaying the block
                     REPLY="$error"
                     return 1;
                 fi
-                [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)"${~interested_in}"([^/]#/*|[^/]#) ]] && mdebug=0
+                [[ "$found_in_trace" -eq 1 && "$error" = (*/[^/]#|[^/]#)${~interested_in}([^/]#/*|[^/]#) ]] && mdebug=0
             done
         fi
     done
