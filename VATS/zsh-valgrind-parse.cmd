@@ -99,11 +99,11 @@ theme=(
 
 # Enable global mdebug (not local as with `interested_in')
 # It's almost always better to use `interested_in' way
-declare mdebug=0
+(( ${+mdebug} )) || declare mdebug
 # Assign a function name / pattern to see log messages
 # only when a stacktrace and an error definition are
 # containing the function
-declare interested_in=""
+(( ${+interested_in} )) || declare interested_in=""
 # FUNCTION: mdebug_mode {{{
 mdebug_mode()
 {
