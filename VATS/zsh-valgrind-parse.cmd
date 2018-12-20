@@ -59,15 +59,18 @@ filters=(
     "1-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)[[:blank:]]\(([^:]##:[0-9]##)\)(#e)"
     "2-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)[[:blank:]]\((in) ([^\)[:blank:]]##)\)(#e)"
     "3-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)(#e)"
-    "4-Summary" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^:]##:)(?#)(#e)"
+    "4-Summary" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^:]##:|Use --track*)(?#)(#e)"
     "5-Error" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
-    "6-Info" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
+    "6-Info"  "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
     "7-Blank" "(#b)(#s)(==[0-9]##==[[:blank:]]#)(#e)"
     "8-TestDesc" "(#b)VATS test:(*)"
 )
 
 # Helper regexes
 local reachable_pat="(#b)(#s)(==[0-9]##==[[:blank:]]##)Reachable blocks?##(#e)"
+local conditional_pat="(#b)(#s)(==[0-9]##==[[:blank:]]##)Conditional jump?##(#e)"
+local invalid_readwrite_pat="(#b)(#s)(==[0-9]##==[[:blank:]]##)Invalid (read|write)?##(#e)"
+local address_pat="(#b)(#s)(==[0-9]##==[[:blank:]](#c2,10))Address 0x?##(#e)"
 # }}}
 # Theme {{{
 local -A theme
@@ -509,7 +512,13 @@ while read -p line; do
             # Is it 6-Info line of Valgrind text occurring? It looks like the
             # 5-Error line, however additional constraints make it a 6-Info
             # line. See $filters association above
-            if [[ $key = *Error && ( $line = $~reachable_pat || "$blank_seen" -eq "0" ) ]]; then
+            if [[ $key = *Error && \
+                ( $line = ${~reachable_pat} || "${blank_seen[$pid]}" -eq "0" ) && \
+                    $line != ${~conditional_pat} &&
+                    $line != ${~invalid_read_pat} &&
+                    $line != ${~invalid_readwrite_pat} &&
+                    $line != ${~address_pat}
+            ]]; then
                 key="6-Info"
             fi
 
