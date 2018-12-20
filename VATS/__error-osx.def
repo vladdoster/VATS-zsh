@@ -27,4 +27,28 @@ errors2+=(
     "* / libSystem_initializer / *"
     # OS X related error
     "* / bootstrap_look_up2 / *"
+    # OS X related error
+    "* / fork / * / xpc_atfork_child / *alloc"
+    # OS X related error (implementation of fork)
+    "* / zfork / fork / * / *alloc*"
+    # OS X related error (implementation of stdlibc)
+    "* / __vfprintf / *"
+    # OS X related error (implementation of stdlibc)
+    "* / fgetc / * / *alloc*"
+    # OS X related error (implementation of currentlocale)
+    "* / currentlocale / * / malloc"
+    # OS X related error (implementation of getlogin_basic)
+    "* / getlogin_basic / * / calloc"
+    # OS X related error (implementation of stdlibc)
+    "* / fgets / * / *alloc* / --BLOCK -- / * / fgets / * / *memchr*"
+    # OS X related error (implementation of some internal library)
+    "* / map_images / * / *alloc*"
+    # OS X related error
+    "* / mkstemp / * / *alloc*"
+    # OS X system error
+    # Use of uninitialised value of size 8
+    # Conditional jump or move depends on uninitialised value(s)
+    "* / (_|)mk(s|)temp / * / find_temp_path / *"
+    "* / (_|)mk(s|)temp / * / find_temp_path"
+
 )
