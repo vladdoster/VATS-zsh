@@ -6,8 +6,7 @@
 # /bin/sh stage, load configuration to obtain $zsh_bin
 #
 
-# This barely works
-SH_ZERO_DIR=${0%/zsh-valgrind-parse.cmd}
+SH_ZERO_DIR=${0%/vruntests.zsh}
 
 [ -z "$ZSHV_TCONF_FILE" ] && ZSHV_TCONF_FILE="vtest.conf"
 [ "$1" != "${1#conf:}" ] && { ZSHV_TCONF_FILE="${1#conf:}"; shift; }
@@ -47,9 +46,9 @@ test_type_msg()
 }
 
 export ZTST_exe
-local cmd="valgrind"
+local cmd="${valgrind_path:-valgrind}"
 local -a valargs
-[[ -x "${ZERO_DIR}/zsh-valgrind-parse.cmd" ]] && cmd="${ZERO_DIR}/zsh-valgrind-parse.cmd"
+[[ "$main_operation_parsing" = (1|yes|on) && -x "${ZERO_DIR}/zsh-valgrind-parse.cmd" ]] && cmd="${ZERO_DIR}/zsh-valgrind-parse.cmd"
 [[ "$test_bin" = "local-zsh" ]] && test_bin="${ZTST_exe}"
 [[ ! -f "$test_bin" ]] && { print "VATS: Test binary ($test_bin) doesn't exist, aborting"; exit 1; }
 
@@ -73,7 +72,7 @@ local -a targs # evaluated test_bin args, non-evaluated Valgrind args
 integer success failure skipped count=0
 
 for file in "${(f)ZTST_testlist}"; do
-  # Prepare test_bin-args
+  # Prepare test_bin-args - from the config file
   targs=()
   for ctarg in "${(z@)test_bin_args}"; do
     eval "print -rl -- $ctarg | while read line; do targs+=( \"\${(Q)line}\" ); done"
@@ -82,6 +81,8 @@ for file in "${(f)ZTST_testlist}"; do
   (( ++ count ))
 
   # Invoke Valgrind (through zsh-valgrind-parse.cmd)
+  # cmd will be: zsh-valgrind-parse.cmd or valgrind,
+  # depending on the option `main_operation_parsing'
   $cmd "${valargs[@]}" "$test_bin" "${targs[@]}"
 done
 
