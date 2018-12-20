@@ -150,15 +150,16 @@ info_enabled()
 # definitions - suppressing full block if there is a match.
 #
 # Input:
-#   $@ - block of text (i.e. set of lines occurred before Valgrind blank line)
+#   $1 - block of text (i.e. set of lines, separated by "<->",
+#   occurred after Valgrind blank line i.e. ==<PID ONLY>==)
 # Output:
 #   stdout - Valgrind block of text printed OR suppressed
 #
 process_block() {
     local -a bl first_subblock_funs second_subblock_funs
-    local blank="" first second
+    local blank="" first second test_desc="$2"
 
-    bl=( "$@" )
+    bl=( "${(@s:<->:)1}" )
     if is_blank "${bl[1]}"; then
         blank="${bl[1]}"
         shift 1 bl
@@ -176,7 +177,7 @@ process_block() {
                 reply=()
                 to_clean_stacktrace "${bl[@]}"
                 if test_stack_trace "${reply[@]}"; then
-                    print "$test_desc"
+                    [[ -n "$test_desc" ]] && print "$test_desc"
                     show_block "$blank" "$first" "${bl[@]}"
                 else
                     print -r -- "${theme[skip_msg]}Skipped single-block error: $REPLY${theme[rst]}"
@@ -192,7 +193,7 @@ process_block() {
                 to_clean_stacktrace "${second_subblock_funs[@]}"
 
                 if test_stack_trace "${reply[@]}"; then
-                    print "$test_desc"
+                    [[ -n "$test_desc" ]] && print "$test_desc"
                     show_block "$blank" "$first" "${first_subblock_funs[@]}" "$second" ${second_subblock_funs[@]}
                 else
                     print -r -- "${theme[skip_msg]}Skipped double-block error: $REPLY${theme[rst]}"
@@ -202,7 +203,7 @@ process_block() {
         fi
     fi
 
-    show_block "$@"
+    show_block ${(@s:<->:)1}
 }
 # }}}
 # FUNCTION: process_umblock {{{
@@ -494,10 +495,13 @@ show_block()
 coproc 2>&1 valgrind "$@"
 
 integer count=0
-typeset matched prev_matched blank_seen=0 test_desc
+typeset matched pid prev_matched
 typeset -a block umblock
+typeset -A pid_to_block blank_seen test_desc
 
 while read -p line; do
+    pid="${${(@s:==:)line}[2]}"
+
     matched=""
     for key in ${(onk)filters[@]}; do
         pat=${filters[$key]}
@@ -511,22 +515,22 @@ while read -p line; do
 
             # Is it a blank line of Valgrind text occuring? It terminates the block
             if [[ "$key" = *Blank ]]; then
-                blank_seen=1
-                process_block $block
+                blank_seen[$pid]=1
+                process_block "${${pid_to_block[$pid]}%\<->}" "${test_desc[$pid]}"
                 # Start a new block of Valgrind text
-                block=( "${key}/$line" )
+                pid_to_block[$pid]="${key}/${line}<->"
             # Is it an Error line of Valgrind text occuring after Summary line?
             # It terminates the block
             elif [[ "$prev_matched" = *Summary && "$key" = *Error ]]; then
-                process_block $block
+                process_block "${pid_to_block[$pid]}" "${test_desc[$pid]}"
                 # Start a new block of Valgrind text
-                block=( "${key}/$line" )
+                pid_to_block[$pid]="${key}/${line}<->"
             elif [[ "$key" = *TestDesc ]]; then
-                 test_desc="$line"
+                 test_desc[$pid]="$line"
             else
                 # Build the block of Valgrind text, remembering type of each
                 # line added to the block (the ${key}/-prefix)
-                block+=( "${key}/$line" )
+                pid_to_block[$pid]+="${key}/${line}<->"
             fi
 
             # Unmatched block is terminated by a match (if we are here then we
