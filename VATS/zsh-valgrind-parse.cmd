@@ -310,7 +310,7 @@ compare_error()
     parts=( "${(@s:/:)error}" )
     parts=( "${parts[@]//[[:blank:]]##/}" )
 
-    integer stack_idx=1
+    integer stack_idx=1 greedy_used=0
     local part mode="exact"
     for part in "${parts[@]}"; do
         (( stack_idx > ssize )) && { stack_idx=-1; break; }
@@ -319,32 +319,49 @@ compare_error()
             continue
         fi
         if [[ "$mode" = "skip" ]]; then
-            while [[ "${stacktrace[stack_idx]}" != ${~part} ]]; do
-                mdebug_mode && print "Looking for \`$part', skipping (in valgrind stack trace): \`${stacktrace[stack_idx]}'"
-                if [[ "${stacktrace[stack_idx]}" = "--BLOCK--" ]]; then
-                    mdebug_mode && print "Didn't match 2-block error properly - \"--BLOCK--\" boundary was skipped, no match"
-                    # Failed to match --BLOCK-- boundary that is
-                    # used by 2-stage error reports (e.g. information
-                    # about invalid write, then second sub-block with
-                    # information on address used with the write)
+            # Outer loop used to implement greedy matching
+            # working for first-after element only (i.e. if
+            # current stack_idx matches, but stack_idx+1 also
+            # matches, then skip current stack_idx, increment
+            # and move onward to stack_idx+1)
+            while (( 1 )); do
+                # Inner loop iterating with `stack_idx' over `stacktrace'
+                while [[ "${stacktrace[stack_idx]}" != ${~part} ]]; do
+                    mdebug_mode && print "Looking for \`$part', skipping (in valgrind stack trace): \`${stacktrace[stack_idx]}'"
+                    if [[ "${stacktrace[stack_idx]}" = "--BLOCK--" ]]; then
+                        mdebug_mode && print "Didn't match 2-block error properly - \"--BLOCK--\" boundary was skipped, no match"
+                        # Failed to match --BLOCK-- boundary that is
+                        # used by 2-stage error reports (e.g. information
+                        # about invalid write, then second sub-block with
+                        # information on address used with the write)
+                        return 1;
+                    fi
+
+                    stack_idx+=1
+                    (( stack_idx > ssize )) && break
+                done
+
+                if (( stack_idx > ssize )); then
+                    mdebug_mode && print "Failed to match element \`$part' (after \`*' in error definition)"
+                    # Failed to match error-element after "*"
                     return 1;
                 fi
 
-                stack_idx+=1
-                (( stack_idx > ssize )) && break
+                # Greedy matching! Don't sit down having a match
+                # if the next stack trace element also has it!
+                if (( stack_idx + 1 <= ssize )) && [[ "${stacktrace[stack_idx+1]}" = ${~part} ]]; then
+                    greedy_used=1
+                    mdebug_mode && print "Skipping a matching element (\`${stacktrace[stack_idx]}'), because next also matches (greedy matching)!"
+                    stack_idx+=1
+                    continue
+                else
+                    # Found, move to next stack element, continue to next error-part
+                    mdebug_mode && print "Looking for \`$part', FOUND (in valgrind stack trace): \`${stacktrace[stack_idx]}' ${${(M)greedy_used:#1}:+(greedy)}, moving to next: \`${stacktrace[stack_idx+1]}'"
+                    stack_idx+=1
+                    mode="exact"
+                    break
+                fi
             done
-
-            if (( stack_idx > ssize )); then
-                mdebug_mode && print "Failed to match element \`$part' (after \`*' in error definition)"
-                # Failed to match error-element after "*"
-                return 1;
-            fi
-
-            # Found, move to next stack element, continue to next error-part
-            mdebug_mode && print "Looking for \`$part', FOUND (in valgrind stack trace): \`${stacktrace[stack_idx]}', moving to next: \`${stacktrace[stack_idx+1]}'"
-            stack_idx+=1
-            mode="exact"
-            continue
         elif [[ "$mode" = "exact" ]]; then
             if [[ "${stacktrace[stack_idx]}" != ${~part} ]]; then
                 mdebug_mode && print "Failed to match \`$part' (vs. valgrind stack trace element: \`${stacktrace[stack_idx]})'"
@@ -357,7 +374,6 @@ compare_error()
             # trace element, continue to next part
             stack_idx+=1
             mode="exact"
-            continue
         fi
     done
 
