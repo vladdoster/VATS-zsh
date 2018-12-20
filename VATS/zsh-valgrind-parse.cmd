@@ -98,6 +98,7 @@ theme=(
 #
 
 # Enable global mdebug (not local as with `interested_in')
+# It's almost always better to use `interested_in' way
 declare mdebug=0
 # Assign a function name / pattern to see log messages
 # only when a stacktrace and an error definition are
@@ -440,6 +441,9 @@ show_block()
     for (( idx = 1; idx <= max; ++ idx )); do
         line="${@[idx]}"
         next_line="${@[idx+1]}"
+
+        # The $filters contain patterns with the (#b) flag, so it
+        # doesn't occur here, however ${match[...]} are being used
 
         # ByAt line: (by|at) 0xADDRESS: ...
         if [[ "$line" = "1-ByAt/"* ]]; then
