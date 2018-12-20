@@ -107,7 +107,7 @@ theme=(
 # FUNCTION: mdebug_mode {{{
 mdebug_mode()
 {
-    [[ "$mdebug" = 1 || "$mdebug" = "yes" || "$mdebug" = "on" ]]
+    [[ "$mdebug" = (1|yes|on) ]]
 }
 # }}}
 # FUNCTION: is_error {{{
@@ -268,7 +268,9 @@ test_stack_trace()
     stacktrace=( "${(Oa)@}" )
 
     # Dynamic mdebug mode, for `interested_in' function
-    [[ -n "$interested_in" && -n "${(M)stacktrace[@]:#${~interested_in}}" ]] && found_in_trace=1
+    [[ -n "$interested_in" && -n "${(M)stacktrace[@]:#${~interested_in}}" ]] && {
+        found_in_trace=1
+    }
 
     for (( idx = 0; idx <= 20; idx ++ )); do
         var_name="errors$idx"
