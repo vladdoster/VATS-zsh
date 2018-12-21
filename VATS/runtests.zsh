@@ -52,19 +52,23 @@ local -a valargs
 [[ "$test_bin" = "local-zsh" ]] && test_bin="${ZTST_exe}"
 [[ ! -f "$test_bin" ]] && { print "VATS: Test binary ($test_bin) doesn't exist, aborting"; exit 1; }
 
-if [[ "$tkind" = nopossiblylost* ]]; then
+if [[ "$test_kind" = nopossiblylost* ]]; then
   valargs=( "--leak-check=full" "--show-possibly-lost=no" )
   test_type_msg "leaks, nopossiblylost"
-elif [[ "$tkind" = error* ]]; then
+elif [[ "$test_kind" = error* ]]; then
   valargs=() 
   test_type_msg "only errors (no leaks)"
-elif [[ "$tkind" = leak* ]]; then
+elif [[ "$test_kind" = leak* || "$test_kind" = "full" ]]; then
   valargs=( "--leak-check=full" )
   test_type_msg "full leak check"
 else
-  print "VATS: Unknown test type \`$tkind\', supported are: error, leak, nopossiblylost. Aborting."
+  print "VATS: Unknown test type \`$test_kind\', supported are: error, leak, nopossiblylost. Aborting."
   exit 1
 fi
+
+[[ "$track_origins" = (1|yes|on) ]] && valargs+=( "--track-origins=yes" )
+
+[[ "$test_desc" = (1|yes|on) ]] && export VLGRND_TEST_DESC=1
 
 local ctarg    # current arg
 local line     # Decomposition trick var
