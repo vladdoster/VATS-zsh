@@ -76,21 +76,25 @@ local address_pat="(#b)(#s)(==[0-9]##==[[:blank:]](#c2,10))Address 0x?##(#e)"
 # Theme {{{
 local -A theme
 theme=(
-    pid            $fg_bold[black]
-    byat           $fg_no_bold[yellow]
-    func           $fg_bold[blue]
-    where_path     $fg_no_bold[red]
-    where_file     $fg_bold[white] 
-    where_linenr   $fg_no_bold[magenta]
-    summary_header $fg_bold[green]
-    summary_body   $fg_no_bold[green]
-    summary_linenr $fg_no_bold[magenta]
-    error          $fg_bold[red]
-    info           $fg_no_bold[yellow]
-    number         $fg_no_bold[magenta]
-    symbol         $fg_bold[black]
-    skip_msg       $fg_bold[black]
-    rst            $reset_color
+    pid                 $fg_bold[black]
+    byat                $fg_no_bold[yellow]
+    func                $fg_bold[blue]
+    where_path          $fg_no_bold[red]
+    where_file          $fg_bold[white]
+    where_linenr        $fg_no_bold[magenta]
+    summary_header      $fg_bold[green]
+    summary_body        $fg_no_bold[green]
+    summary_linenr      $fg_no_bold[magenta]
+    error               $fg_bold[red]
+    info                $fg_no_bold[yellow]
+    number              $fg_no_bold[magenta]
+    symbol              $fg_bold[black]
+    skip_msg            $fg_bold[black]
+    pre_test_desc       $fg_no_bold[white]
+    test_desc           $fg_no_bold[yellow]
+    test_desc_marks     $fg_bold[blue]
+    the_test_desc_marks "@@@"
+    rst                 $reset_color
 )
 # }}}
 
@@ -182,10 +186,10 @@ process_block() {
                 reply=()
                 to_clean_stacktrace "${bl[@]}"
                 if test_stack_trace "${reply[@]}"; then
-                    [[ -n "$test_desc" ]] && print "$test_desc"
+                    [[ -n "$test_desc" && "$last_tdesc" != "$test_desc" ]] && { print "${theme[pre_test_desc]}Follow report(s) for test:${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]} ${theme[test_desc]}$test_desc${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]}"; last_tdesc="$test_desc"; }
                     show_block "$blank" "$first" "${bl[@]}"
                 else
-                    [[ -n "$test_desc" ]] && print "$test_desc"
+                    [[ -n "$test_desc" && "$last_tdesc" != "$test_desc" ]] && { print "${theme[pre_test_desc]}Follow report(s) for test:${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]} ${theme[test_desc]}$test_desc${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]}"; last_tdesc="$test_desc"; }
                     print -r -- "${theme[skip_msg]}Skipped single-block error: $REPLY${theme[rst]}"
                 fi
             else
@@ -199,10 +203,10 @@ process_block() {
                 to_clean_stacktrace "${second_subblock_funs[@]}"
 
                 if test_stack_trace "${reply[@]}"; then
-                    [[ -n "$test_desc" ]] && print "$test_desc"
+                    [[ -n "$test_desc" && "$last_tdesc" != "$test_desc" ]] && { print "${theme[pre_test_desc]}Follow report(s) for test:${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]} ${theme[test_desc]}$test_desc${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]}"; last_tdesc="$test_desc"; }
                     show_block "$blank" "$first" "${first_subblock_funs[@]}" "$second" ${second_subblock_funs[@]}
                 else
-                    [[ -n "$test_desc" ]] && print "$test_desc"
+                    [[ -n "$test_desc" && "$last_tdesc" != "$test_desc" ]] && { print "${theme[pre_test_desc]}Follow report(s) for test:${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]} ${theme[test_desc]}$test_desc${theme[rst]} ${theme[test_desc_marks]}${theme[the_test_desc_marks]}${theme[rst]}"; last_tdesc="$test_desc"; }
                     print -r -- "${theme[skip_msg]}Skipped double-block error: $REPLY${theme[rst]}"
                 fi
             fi
@@ -507,7 +511,7 @@ show_block()
 coproc 2>&1 valgrind "$@"
 
 integer count=0
-typeset matched pid prev_matched
+typeset matched pid prev_matched last_tdesc
 typeset -a block umblock
 typeset -A pid_to_block blank_seen test_desc
 
