@@ -42,7 +42,7 @@ autoload colors; colors
 
 test_type_msg()
 {
-  print "$fg[green]@@@$reset_color Test type: $1 $fg[green]@@@$reset_color Test binary: $test_bin $fg[green]@@@$reset_color Control binary: $zsh_control_bin $ZSH_VERSION $fg[green]@@@$reset_color"
+  print "$fg[green]@@@$reset_color Test type: $fg[yellow]$1$reset_color $fg[green]@@@$reset_color Test binary: $test_bin $fg[green]@@@$reset_color Control binary: $zsh_control_bin $ZSH_VERSION $fg[green]@@@$reset_color"
 }
 
 export ZTST_exe
