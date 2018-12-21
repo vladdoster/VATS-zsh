@@ -402,6 +402,7 @@ $ZTST_curline"
 	    ZTST_xstatus=$match[1]
 	    ZTST_flags=$match[2]
 	    ZTST_message=${match[3]:+${match[3][2,-1]}}
+            [[ $VLGRND_TEST_DESC = 1 ]] && print -- "Test decription: $ZTST_message"
 	  else
 	    ZTST_testfailed "expecting test status at:
 $ZTST_curline"
