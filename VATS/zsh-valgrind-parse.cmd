@@ -60,7 +60,7 @@ filters=(
     "1-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)[[:blank:]]\(([^:]##:[0-9]##)\)(#e)"
     "2-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)[[:blank:]]\((in) ([^\)[:blank:]]##)\)(#e)"
     "3-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)(#e)"
-    "4-TestDesc" "(#b)(#s)(==[0-9]##==[[:blank:]]##)VATS-test-desc:(*)"
+    "4-TestDesc" "(#b)(#s)VATS-test-desc: (*)" # No PID, explained at "*TestDesc" if-fork
     "5-Summary" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^:]##:|Use --track*)(?#)(#e)"
     "6-Error" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
     "7-Info"  "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
@@ -183,6 +183,7 @@ process_block() {
                 to_clean_stacktrace "${bl[@]}"
                 if test_stack_trace "${reply[@]}"; then
                     [[ -n "$test_desc" ]] && print "$test_desc"
+                    show_block "$blank" "$first" "${bl[@]}"
                 else
                     [[ -n "$test_desc" ]] && print "$test_desc"
                     print -r -- "${theme[skip_msg]}Skipped single-block error: $REPLY${theme[rst]}"
@@ -533,17 +534,22 @@ while read -p line; do
             # Is it a blank line of Valgrind text occuring? It terminates the block
             if [[ "$key" = *Blank ]]; then
                 blank_seen[$pid]=1
-                process_block "${${pid_to_block[$pid]}%\<->}" "${test_desc[$pid]}"
+                process_block "${${pid_to_block[$pid]}%\<->}" "${test_desc[0]}"
                 # Start a new block of Valgrind text
                 pid_to_block[$pid]="${key}/${line}<->"
             # Is it an Error line of Valgrind text occuring after Summary line?
             # It terminates the block
             elif [[ "$prev_matched" = *Summary && "$key" = *Error ]]; then
-                process_block "${pid_to_block[$pid]}" "${test_desc[$pid]}"
+                process_block "${pid_to_block[$pid]}" "${test_desc[0]}"
                 # Start a new block of Valgrind text
                 pid_to_block[$pid]="${key}/${line}<->"
             elif [[ "$key" = *TestDesc ]]; then
-                 test_desc[$pid]="${match[2]}"
+                # It was hard to embed the proper PID within ===PID=== bit -
+                # - valgrind spawns many subprocesses and this is weird, as
+                # ztst.zsh runs on the tested Zsh ($ZTST_exe) - so in general
+                # a single instance runs all tests. However common assign key
+                # (the 0) works great so it's not a priority to "fix" this
+                test_desc[0]="${match[1]}"
             else
                 # Build the block of Valgrind text, remembering type of each
                 # line added to the block (the ${key}/-prefix)
