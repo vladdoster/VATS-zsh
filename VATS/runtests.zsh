@@ -38,6 +38,7 @@ typeset -g ZERO_DIR="${ZERO:h}"
 
 emulate zsh -o warncreateglobal -o typesetsilent
 
+fpath[1,0]=( ../Functions/Misc )
 autoload colors; colors
 
 test_type_msg()
