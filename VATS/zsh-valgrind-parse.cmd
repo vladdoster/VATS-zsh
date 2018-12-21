@@ -59,11 +59,11 @@ filters=(
     "1-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)[[:blank:]]\(([^:]##:[0-9]##)\)(#e)"
     "2-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)[[:blank:]]\((in) ([^\)[:blank:]]##)\)(#e)"
     "3-ByAt" "(#b)(#s)(==[0-9]##==[[:blank:]]##)((#B)(by|at) 0x[A-F0-9]##: )(?##)(#e)"
-    "4-Summary" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^:]##:|Use --track*)(?#)(#e)"
-    "5-Error" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
-    "6-Info"  "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
-    "7-Blank" "(#b)(#s)(==[0-9]##==[[:blank:]]#)(#e)"
-    "8-TestDesc" "(#b)VATS test:(*)"
+    "4-TestDesc" "(#b)(#s)(==[0-9]##==[[:blank:]]##)VATS-test-desc:(*)"
+    "5-Summary" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^:]##:|Use --track*)(?#)(#e)"
+    "6-Error" "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
+    "7-Info"  "(#b)(#s)(==[0-9]##==[[:blank:]]##)([^[:blank:]]?##)(#e)"
+    "8-Blank" "(#b)(#s)(==[0-9]##==[[:blank:]]#)(#e)"
 )
 
 # Helper regexes
@@ -112,12 +112,12 @@ mdebug_mode()
 # }}}
 # FUNCTION: is_error {{{
 is_error() {
-    [[ "$1" = "5-Error/"* ]]
+    [[ "$1" = "6-Error/"* ]]
 }
 # }}}
 # FUNCTION: is_blank {{{
 is_blank() {
-    [[ "$1" = "7-Blank/"* ]]
+    [[ "$1" = "8-Blank/"* ]]
 }
 # }}}
 # FUNCTION: which_byat {{{
@@ -182,8 +182,8 @@ process_block() {
                 to_clean_stacktrace "${bl[@]}"
                 if test_stack_trace "${reply[@]}"; then
                     [[ -n "$test_desc" ]] && print "$test_desc"
-                    show_block "$blank" "$first" "${bl[@]}"
                 else
+                    [[ -n "$test_desc" ]] && print "$test_desc"
                     print -r -- "${theme[skip_msg]}Skipped single-block error: $REPLY${theme[rst]}"
                 fi
             else
@@ -200,6 +200,7 @@ process_block() {
                     [[ -n "$test_desc" ]] && print "$test_desc"
                     show_block "$blank" "$first" "${first_subblock_funs[@]}" "$second" ${second_subblock_funs[@]}
                 else
+                    [[ -n "$test_desc" ]] && print "$test_desc"
                     print -r -- "${theme[skip_msg]}Skipped double-block error: $REPLY${theme[rst]}"
                 fi
             fi
@@ -429,7 +430,7 @@ compare_error()
 # (can suppress those sections).
 #
 # Input:
-#   $@ - block of text to display, with type-prefixes like "6-Info/{text}"
+#   $@ - block of text to display, with type-prefixes like "7-Info/{text}"
 #
 # Output
 #   stdout - lines printed with colors, if not suppresed by config
@@ -460,11 +461,11 @@ show_block()
             if [[ "${line#*/}" = ${~filters[3-ByAt]} ]]; then
                 print "${theme[pid]}${match[1]}${theme[byat]}${match[2]}${theme[func]}${match[3]}${theme[rst]}"
             fi
-        elif [[ "$line" = "4-Summary/"* ]]; then
+        elif [[ "$line" = "5-Summary/"* ]]; then
             if ! summaries_enabled; then
                 continue
             fi
-            if [[ "${line#*/}" = ${~filters[4-Summary]} ]]; then
+            if [[ "${line#*/}" = ${~filters[5-Summary]} ]]; then
                 if [[ "${match[2]}" = [A-Z[:blank:]]##[:] ]]; then
                     match[3]="${match[3]//(#m) [0-9,]## /${theme[number]}$MATCH${theme[rst]}}"
                     print "${theme[pid]}${match[1]}${theme[summary_header]}${match[2]}${theme[rst]}${match[3]}"
@@ -473,19 +474,19 @@ show_block()
                     print "${theme[pid]}${match[1]}${theme[summary_body]}${match[2]}${theme[rst]}${match[3]}"
                 fi
             fi
-        elif [[ "$line" = "5-Error/"* ]]; then
-            if [[ "${line#*/}" = ${~filters[5-Error]} ]]; then
+        elif [[ "$line" = "6-Error/"* ]]; then
+            if [[ "${line#*/}" = ${~filters[6-Error]} ]]; then
                 print "${theme[pid]}${match[1]}${theme[error]}${match[2]}${theme[rst]}"
             fi
-        elif [[ "$line" = "6-Info/"* ]]; then
+        elif [[ "$line" = "7-Info/"* ]]; then
             if ! info_enabled; then
                 continue
             fi
-            if [[ "${line#*/}" = ${~filters[6-Info]} ]]; then
+            if [[ "${line#*/}" = ${~filters[7-Info]} ]]; then
                 print "${theme[pid]}${match[1]}${theme[info]}${match[2]}${theme[rst]}"
             fi
-        elif [[ "$line" = "7-Blank/"* ]]; then
-            if [[ "$next_line" = "4-Summary/"* ]]; then
+        elif [[ "$line" = "8-Blank/"* ]]; then
+            if [[ "$next_line" = "5-Summary/"* ]]; then
                 if ! summaries_enabled; then
                     continue
                 fi
@@ -515,8 +516,8 @@ while read -p line; do
     for key in ${(onk)filters[@]}; do
         pat=${filters[$key]}
         if [[ "$line" = $~pat ]]; then
-            # Is it 6-Info line of Valgrind text occurring? It looks like the
-            # 5-Error line, however additional constraints make it a 6-Info
+            # Is it 7-Info line of Valgrind text occurring? It looks like the
+            # 6-Error line, however additional constraints make it a 7-Info
             # line. See $filters association above
             if [[ $key = *Error && \
                 ( $line = ${~reachable_pat} || "${blank_seen[$pid]}" -eq "0" ) && \
@@ -525,7 +526,7 @@ while read -p line; do
                     $line != ${~invalid_readwrite_pat} &&
                     $line != ${~address_pat}
             ]]; then
-                key="6-Info"
+                key="7-Info"
             fi
 
             # Is it a blank line of Valgrind text occuring? It terminates the block
@@ -541,7 +542,7 @@ while read -p line; do
                 # Start a new block of Valgrind text
                 pid_to_block[$pid]="${key}/${line}<->"
             elif [[ "$key" = *TestDesc ]]; then
-                 test_desc[$pid]="$line"
+                 test_desc[$pid]="${match[2]}"
             else
                 # Build the block of Valgrind text, remembering type of each
                 # line added to the block (the ${key}/-prefix)
