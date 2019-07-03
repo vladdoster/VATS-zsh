@@ -34,6 +34,11 @@ errors1+=(
     "* / *load_module / * / newhashtable / *"
     "*load_module / * / newhashtable / *"
 
+    # An assumed initialization of structures in various modules to be
+    # collected by the OS
+    "* / *load_module / * / (calloc|malloc|?alloc_zone_?alloc)"
+    "*load_module / * / (calloc|malloc|?alloc_zone_?alloc)"
+
     # Memory leak in the gdbm_errno_location
     "* / bin_ztie / * / gdbm_errno_location / *"
     "bin_ztie / * / gdbm_errno_location / *"
