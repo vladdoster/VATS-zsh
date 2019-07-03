@@ -51,8 +51,8 @@ errors1+=(
 
     # OS X related error
     # Trailing calls are from libsystem*, libobjc, etc
-    "* / exe* / * / zfork / * / fork / *"
-    "exe* / * / zfork / * / fork / *"
+    "* / (paramsubst|exe*) / * / zfork / * / fork / *"
+    "(paramsubst|exe*) / * / zfork / * / fork / *"
 
     # OS X related error (implementation of stdlibc)
     "* / fgetc / * / (calloc|malloc|?alloc_zone_?alloc|*reallocate*)"
