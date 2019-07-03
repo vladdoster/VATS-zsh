@@ -9,10 +9,7 @@ test_bin_args='+Z -f $ZTST_srcdir/ztst.zsh $file'   # runs ztst.zsh on given $fi
 test_bin="local-zsh"                                # expands to ../Src/zsh
 ```
 
-The variable `$file` is set to current test-file for each test-run. Example test file:
-
-**Zshell**: For Zsh-integrated VATS, `$file` is just passed as argument to `ztst.zsh`. So it is
-`A01grammar.ztst`, for example.
+The variable `$file` is set to current test-file for each test-run. For Zsh-integrated VATS, `$file` is just passed as argument to `ztst.zsh`. So it is `A01grammar.ztst`, for example.
 
 ## Error Definitions
 
@@ -53,23 +50,18 @@ modified: Test/Makefile.in
          stat=1; \
 ```
 
-## Fundamental Test-Configuration
+## Basic Test-Configuration
 
 The configuration-file of tests is `vtest.conf`. It defines two settings:
 
 ```zsh
-test_bin="../Src/cgiturl"   # Binary that runs any test, or is the tested program itself
+test_bin="../Src/cgiturl"   # Binary that runs any test (is the tested program itself)
 zsh_control_bin="zsh"       # Binary used when scheduling tests & interpreting Valgrind output
 ```
 
 Variable `zsh_control_bin` is used to implement special `#!` behavior: `runtests.zsh`
-starts with `#!/bin/sh`, reads `vtest.conf`, and restarts with `zsh_control_bin`. This way
+starts with `#!/bin/sh`, reads `vtest.conf`, and restarts with `$zsh_control_bin`. This way
 user can define shebang interpreter via separate configuration file (`vtest.conf`).
-
-The second script that uses `zsh_control_bin` is `zsh-valgrind-parse.cmd`. It also restarts
-via `#!/bin/sh` and `exec /usr/bin/env "$zsh_control_bin"`.
-
-The setting `test_bin` specifies the test-program used to run tests. **This binary is examined by Valgrind**.
 
 ## Remaining Test-Configuration
 
