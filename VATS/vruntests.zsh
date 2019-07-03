@@ -6,7 +6,7 @@
 # /bin/sh stage, load configuration to obtain $zsh_bin
 #
 
-SH_ZERO_DIR=${0%/runtests.zsh}
+SH_ZERO_DIR=${0%/vruntests.zsh}
 
 [ -z "$ZSHV_TCONF_FILE" ] && ZSHV_TCONF_FILE="vtest.conf"
 [ "$1" != "${1#conf:}" ] && { ZSHV_TCONF_FILE="${1#conf:}"; shift; }
