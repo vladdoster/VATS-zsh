@@ -11,6 +11,10 @@ SH_ZERO_DIR=${0%/vruntests.zsh}
 [ -z "$ZSHV_TCONF_FILE" ] && ZSHV_TCONF_FILE="vtest.conf"
 [ "$1" != "${1#conf:}" ] && { ZSHV_TCONF_FILE="${1#conf:}"; shift; }
 
+#
+# Source both under sh and zsh - the former for the $zsh_control_bin
+#
+
 if [ -n "$ZSHV_TCONF_DIR" ]; then
   . "${ZSHV_TCONF_DIR}/${ZSHV_TCONF_FILE}"
 elif [ -f "${SH_ZERO_DIR}/${ZSHV_TCONF_FILE}" ]; then
@@ -47,7 +51,7 @@ test_type_msg()
 }
 
 export ZTST_exe
-local cmd="${valgrind_path:-valgrind}"
+local cmd valcmd="${valgrind_path:-valgrind}"
 local -a valargs
 [[ "$main_operation_parsing" = (1|yes|on) && -x "${ZERO_DIR}/zsh-valgrind-parse.cmd" ]] && cmd="${ZERO_DIR}/zsh-valgrind-parse.cmd"
 [[ "$test_bin" = "local-zsh" ]] && test_bin="${ZTST_exe}"

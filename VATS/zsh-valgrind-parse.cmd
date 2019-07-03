@@ -508,7 +508,7 @@ show_block()
 #
 
 # Valgrind output processing {{{
-coproc 2>&1 valgrind "$@"
+coproc 2>&1 ${valgrind_path:-valgrind} "$@"
 
 integer count=0
 typeset matched pid prev_matched last_tdesc
