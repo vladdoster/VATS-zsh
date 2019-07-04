@@ -51,7 +51,7 @@ test_type_msg()
 }
 
 export ZTST_exe
-local cmd valcmd="${valgrind_path:-valgrind}"
+local cmd="${valgrind_path:-valgrind}"
 local -a valargs
 [[ "$main_operation_parsing" = (1|yes|on) && -x "${ZERO_DIR}/zsh-valgrind-parse.cmd" ]] && cmd="${ZERO_DIR}/zsh-valgrind-parse.cmd"
 [[ "$test_bin" = "local-zsh" ]] && test_bin="${ZTST_exe}"
