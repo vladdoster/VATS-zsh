@@ -82,8 +82,7 @@ info="no"                    # show info messages?
 
 ## The vtest.conf pasted
 
-```zsh
-# -*- Mode: sh; indent-tabs-mode: nil; -*-
+```zsh# -*- Mode: sh; indent-tabs-mode: nil; -*-
 # vim:ft=zsh:sw=4:sts=4:et
 
 # Main
@@ -93,7 +92,7 @@ main_operation_parsing="yes" # The main feature, whether to use it (i.e. whether
 valgrind_path="valgrind"     # Find the valgrind binary to run through $PATH
 
 # Valgrind run modes
-test_kind="leak"             # Test kind: error, (leak|full), nopossiblylost
+test_kind="leak"             # Test kind: error, (leak|full - the same meaning), nopossiblylost
 track_origins="no"           # Whether to pass --track-origns=yes to valgrind binary
 
 # Gating of Valgrind's and other output
@@ -107,8 +106,9 @@ mdebug="no"                  # Match-debug, use to debug error definition matchi
 interested_in=""             # As if mdebug=1 (i.e. debugging of why an error-def matches
                              # or not), but only active if: stack trace and error definition
                              # contain $interested_in
-#interested_in="*mk*temp"     # Example value, will match error def: "* / (_|)mk(s|)temp / * / find_temp_path"
-#interested_in="(*locale*|*fork*|\\*\\ /\\ dispatch_once_f*|*printf*)" # Other example value - debugging multiple error-defs at once
+#interested_in="*mk*temp"    # Example value, will match error def:
+                             # "* / (_|)mk(s|)temp / * / find_temp_path"
+#interested_in="(*locale*|*fork*|*printf*)" # Other example value - debugging multiple error-defs at once
 
 # Arguments passed to $test_bin (i.e. ../Src/zsh most of the time), evaluated
 # at use (i.e. getting the value of $file will be done at each loop cycle).
