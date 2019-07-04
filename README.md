@@ -70,7 +70,7 @@ Allowed values are: `error` (only detect read/write errors), `leak` (also detect
 `nopossiblylost` (detect memory leaks, but not _possibly_ lost blocks).
 
 ```zsh
-tkind="leak"                # Test kind: error, leak, nopossiblylost
+test_kind="leak"             # Test kind: error, (leak|full - the same meaning), nopossiblylost 
 ```
 
 `Valgrind` messages of type `summary` and `info` are muted via lines:
