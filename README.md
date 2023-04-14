@@ -1,7 +1,7 @@
 # Valgrind Automatic Tests Suite (VATS)
 
-Runs sequence of tests, preceded by `valgrind` call, with a command and arguments taken from file `vtest.conf`.
-The arguments are dynamic because the `vtest.conf` entry can look like this:
+Runs sequence of tests, preceded by `valgrind` call, with a command and arguments taken from file `vtest.conf`. The
+arguments are dynamic because the `vtest.conf` entry can look like this:
 
 ```SystemVerilog
 # Arguments passed to $test_bin, evaluated at use (i.e. for each test separately)
@@ -9,14 +9,16 @@ test_bin_args='+Z -f $ZTST_srcdir/ztst.zsh $file'   # runs ztst.zsh on given $fi
 test_bin="local-zsh"                                # expands to ../Src/zsh
 ```
 
-The variable `$file` is set to current test-file for each test-run. For Zsh-integrated valgrind tests, `$file` is just passed as argument to `ztst.zsh`. It comes from the outer loop in `vruntests.zsh`. So it is `A01grammar.ztst`, for example.
+The variable `$file` is set to current test-file for each test-run. For Zsh-integrated valgrind tests, `$file` is just
+passed as argument to `ztst.zsh`. It comes from the outer loop in `vruntests.zsh`. So it is `A01grammar.ztst`, for
+example.
 
 ## Error Definitions
 
-You can define errors so that they are skipped from test result (i.e. from Valgrind output). This is
-the main feature of VATS because it allows to quickly check if changes broke anything. Usage is very
-much like of unit tests – run `make TESTNUM=A01`, look for any red color, done. Zero parsing with
-eyes. A typical definition for Zshell can look like this:
+You can define errors so that they are skipped from test result (i.e. from Valgrind output). This is the main feature of
+VATS because it allows to quickly check if changes broke anything. Usage is very much like of unit tests – run
+`make TESTNUM=A01`, look for any red color, done. Zero parsing with eyes. A typical definition for Zshell can look like
+this:
 
 ```zsh
 errors1+=( "* / zsh_main / setupvals / gettimeofday / *" )
@@ -27,6 +29,7 @@ and is placed in `__error1.def` or other such file with index.
 ## Integrating With Project
 
 Following patch applied to the Test/Makefile solves the integration of VATS to Zsh:
+
 ```diff
 ──────────────────────────────────────────────────────────────────────────────────────────
 modified: Test/Makefile.in
@@ -59,15 +62,15 @@ test_bin="../Src/cgiturl"   # Binary that runs any test (is the tested program i
 zsh_control_bin="zsh"       # Binary used when scheduling tests & interpreting Valgrind output
 ```
 
-Variable `zsh_control_bin` is used to implement special `#!` behavior: `runtests.zsh`
-starts with `#!/bin/sh`, reads `vtest.conf`, and restarts with `$zsh_control_bin`. This way
-user can define shebang interpreter via separate configuration file (`vtest.conf`).
+Variable `zsh_control_bin` is used to implement special `#!` behavior: `runtests.zsh` starts with `#!/bin/sh`, reads
+`vtest.conf`, and restarts with `$zsh_control_bin`. This way user can define shebang interpreter via separate
+configuration file (`vtest.conf`).
 
 ## Remaining Test-Configuration
 
-The setting `tkind` is used to set a **test-kind**. These are modes of Valgrind operation.
-Allowed values are: `error` (only detect read/write errors), `leak` (also detect memory leaks),
-`nopossiblylost` (detect memory leaks, but not _possibly_ lost blocks).
+The setting `tkind` is used to set a **test-kind**. These are modes of Valgrind operation. Allowed values are: `error`
+(only detect read/write errors), `leak` (also detect memory leaks), `nopossiblylost` (detect memory leaks, but not
+_possibly_ lost blocks).
 
 ```zsh
 test_kind="leak"             # Test kind: error, (leak|full - the same meaning), nopossiblylost 
